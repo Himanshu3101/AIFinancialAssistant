@@ -62,13 +62,13 @@ fun TransactionScreen(
     onIntent: (TransactionIntent) -> Unit
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(24.dp),
     ) {
         FinancialSummary(uiState)
         Spacer(
-            modifier = Modifier.height(8.dp)
+            modifier = modifier.height(8.dp)
         )
 
         Button(
@@ -76,7 +76,7 @@ fun TransactionScreen(
                 onIntent(TransactionIntent.refreshTransactions)
             },
             enabled = !uiState.isLoading,
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
 
         ) {
@@ -84,7 +84,7 @@ fun TransactionScreen(
         }
 
         Spacer(
-            modifier = Modifier.height(8.dp)
+            modifier = modifier.height(8.dp)
         )
 
         FlowScreen(
