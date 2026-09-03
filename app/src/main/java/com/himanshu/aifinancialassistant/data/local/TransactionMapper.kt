@@ -11,7 +11,7 @@ fun TransactionEntity.todomain(): Transaction{
         amount = amount,
         category = TransactionCategory.valueOf(category.uppercase()),
         date = date,
-        type = TransactionType.valueOf(type)
+        type = TransactionType.valueOf(type.uppercase())
     )
 }
 

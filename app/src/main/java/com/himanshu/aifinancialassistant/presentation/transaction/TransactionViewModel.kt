@@ -2,6 +2,7 @@ package com.himanshu.aifinancialassistant.presentation.transaction
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.himanshu.aifinancialassistant.domain.usecase.GetFinancialSummaryUseCase
 import com.himanshu.aifinancialassistant.domain.usecase.GetTransactionsUseCase
 import com.himanshu.aifinancialassistant.domain.usecase.SyncTransactionsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +15,8 @@ import javax.inject.Inject
 @HiltViewModel
 class TransactionViewModel @Inject constructor(
     private val getTransactionsUseCase: GetTransactionsUseCase,
-    private val syncTransactionsUseCase: SyncTransactionsUseCase
+    private val syncTransactionsUseCase: SyncTransactionsUseCase,
+    private val getFinancialSummaryUseCase: GetFinancialSummaryUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TransactionUiState())
@@ -39,8 +41,11 @@ class TransactionViewModel @Inject constructor(
     private fun observeTransactions() {
         viewModelScope.launch {
             getTransactionsUseCase().collect{ transactions ->
+                val summary = getFinancialSummaryUseCase()
+
                 _uiState.value = _uiState.value.copy(
-                    transactions = transactions
+                    transactions = transactions,
+                    financialSummary = summary
                 )
             }
         }

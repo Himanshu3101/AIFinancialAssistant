@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -33,7 +34,6 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class TransactionScreen : ComponentActivity() {
-
     private val viewModel: TransactionViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,8 +65,12 @@ fun TransactionScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp),
-        verticalArrangement = Arrangement.Center
     ) {
+        FinancialSummary(uiState)
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
+
         Button(
             onClick = {
                 onIntent(TransactionIntent.refreshTransactions)
@@ -74,75 +78,103 @@ fun TransactionScreen(
             enabled = !uiState.isLoading,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        ) {
-            if(uiState.isLoading){
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp
-                )
-                Spacer(
-                    modifier = Modifier.width(8.dp)
-                )
-                Text("Refreshing..,")
-            }else{
-                Text("Refresh")
-            }
 
+        ) {
+            ScreenFlow(uiState)
         }
 
-        if (uiState.error != null && uiState.transactions.isEmpty()) {
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
 
+        FlowScreen(
+            uiState = uiState
+        )
+    }
+}
 
+@Composable
+fun FinancialSummary(uiState: TransactionUiState) {
+    uiState.financialSummary?.let { summary ->
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
             Text(
-                text = "Something went wrong",
-                style = MaterialTheme.typography.titleLarge
+                text = "Total Spent",
+                style = MaterialTheme.typography.titleMedium
             )
 
             Text(
-                text = uiState.error,
-                modifier = Modifier.padding(top = 8.dp)
+                text = "Rs. ${summary.totalSpent}",
+                style = MaterialTheme.typography.headlineMedium
             )
 
-        } else if (uiState.isLoading && uiState.transactions.isEmpty()) {
-            Text(
-                text = "Loading Transactions..,",
-                modifier = Modifier.padding(16.dp)
-            )
-        } else if (uiState.transactions.isEmpty()) {
-
-           /* Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.Center
-            ) {*/
+            summary.spendingByCategory.forEach { (category, amount) ->
                 Text(
-                    text = "No transactions yet",
-                    style = MaterialTheme.typography.titleLarge
+                    text = "${category.name}: ₹$amount",
                 )
-
-                Text(
-                    text = "Your transactions will appear here."
-                )
-//            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(
-                    items = uiState.transactions,
-                    key = { transaction -> transaction.id }
-                ) { transaction ->
-                    TransactionCard(transaction)
-                }
             }
         }
     }
 }
 
+@Composable
+fun ScreenFlow(uiState: TransactionUiState) {
+    if (uiState.isLoading) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(20.dp),
+            strokeWidth = 2.dp
+        )
+        Spacer(
+            modifier = Modifier.width(8.dp)
+        )
+        Text("Refreshing..,")
+    } else {
+        Text("Refresh")
+    }
+}
+
+@Composable
+fun FlowScreen(uiState: TransactionUiState) {
+    if (uiState.error != null && uiState.transactions.isEmpty()) {
+        Text(
+            text = "Something went wrong",
+            style = MaterialTheme.typography.titleLarge
+        )
+        Text(
+            text = uiState.error,
+            modifier = Modifier.padding(top = 8.dp)
+        )
+
+    } else if (uiState.isLoading && uiState.transactions.isEmpty()) {
+        Text(
+            text = "Loading Transactions..,",
+            modifier = Modifier.padding(16.dp)
+        )
+    } else if (uiState.transactions.isEmpty()) {
+        Text(
+            text = "No transactions yet",
+            style = MaterialTheme.typography.titleLarge
+        )
+
+        Text(
+            text = "Your transactions will appear here."
+        )
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(
+                items = uiState.transactions,
+                key = { transaction -> transaction.id }
+            ) { transaction ->
+                TransactionCard(transaction)
+            }
+        }
+    }
+}
 
 @Composable
 private fun TransactionCard(

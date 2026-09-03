@@ -1,4 +1,4 @@
-package com.himanshu.aifinancialassistant.data.di
+package com.himanshu.aifinancialassistant.di
 
 import com.himanshu.aifinancialassistant.data.repositoryImpl.FinancialRepositoryImpl
 import com.himanshu.aifinancialassistant.domain.repository.FinancialRepository

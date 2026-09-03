@@ -1,7 +1,6 @@
-package com.himanshu.aifinancialassistant.data.di
+package com.himanshu.aifinancialassistant.di
 
 import androidx.room.Room
-import androidx.room.RoomDatabase
 import com.himanshu.aifinancialassistant.data.local.AppDatabase
 import dagger.Module
 import dagger.Provides
