@@ -10,4 +10,6 @@ interface FinancialRepository {
     suspend fun getTransactionByCategory(
         category: String
     ): List<Transaction>
+
+    suspend fun syncTransactions()
 }
