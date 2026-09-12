@@ -6,6 +6,7 @@ import javax.inject.Inject
 
 class AskFinancialAssistantUseCase @Inject constructor(
     private val aiRepository: AIRepository,
+    private val classifyFinancialQuestionUseCase: ClassifyFinancialQuestionUseCase,
     private val buildFinancialContextUseCase: BuildFinancialContextUseCase,
     private val financialContextFormatter: FinancialContextFormatter
 ) {
@@ -13,7 +14,9 @@ class AskFinancialAssistantUseCase @Inject constructor(
         userPrompt: String
     ): String{
 
-        val financialContext = buildFinancialContextUseCase()
+        val intent =  classifyFinancialQuestionUseCase(userPrompt)
+
+        val financialContext = buildFinancialContextUseCase(intent)
 
         val context = financialContextFormatter.format(
             financialContext

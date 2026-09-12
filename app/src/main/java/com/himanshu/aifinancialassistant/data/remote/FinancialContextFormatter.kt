@@ -6,13 +6,15 @@ import javax.inject.Inject
 class FinancialContextFormatter @Inject constructor() {
 
     fun format(context: FinancialContext): String{
+
+
         val categories = context.spendingByCategory
             .entries
             .joinToString ("\n"){ (category, amount) ->
                 "- ${category.name}: Rs. $amount"
             }
 
-        return """
+        return context.relevantInformation?: """
             Financial Summary:
             Total Spending: Rs. ${context.totalSpent}
             

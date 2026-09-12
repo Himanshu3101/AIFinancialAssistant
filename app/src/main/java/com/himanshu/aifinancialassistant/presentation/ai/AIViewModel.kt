@@ -36,7 +36,6 @@ class AIViewModel @Inject constructor(
 
             try{
                 val response = askFinancialAssistantUseCase(question)
-                println("VIEWMODEL RESPONSE = $response")
                 _uiState.value = AIUiState(
                     isLoading = false,
                     response = response,
