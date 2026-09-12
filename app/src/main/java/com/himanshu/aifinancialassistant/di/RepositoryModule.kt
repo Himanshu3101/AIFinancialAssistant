@@ -1,6 +1,8 @@
 package com.himanshu.aifinancialassistant.di
 
+import com.himanshu.aifinancialassistant.data.repositoryImpl.AIRepositoryImpl
 import com.himanshu.aifinancialassistant.data.repositoryImpl.FinancialRepositoryImpl
+import com.himanshu.aifinancialassistant.domain.repository.AIRepository
 import com.himanshu.aifinancialassistant.domain.repository.FinancialRepository
 import dagger.Binds
 import dagger.Module
@@ -15,4 +17,9 @@ abstract class RepositoryModule {
     abstract fun bindFinancialRepository(
         implementation: FinancialRepositoryImpl
     ): FinancialRepository
+
+    @Binds
+    abstract fun bindAIRepository(
+        implementation: AIRepositoryImpl
+    ): AIRepository
 }

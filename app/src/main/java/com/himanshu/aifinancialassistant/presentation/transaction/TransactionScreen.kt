@@ -29,12 +29,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.himanshu.aifinancialassistant.domain.model.Transaction
+import com.himanshu.aifinancialassistant.presentation.ai.AIChatScreen
+import com.himanshu.aifinancialassistant.presentation.ai.AIViewModel
 import com.himanshu.aifinancialassistant.ui.theme.AIFinancialAssistantTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class TransactionScreen : ComponentActivity() {
     private val viewModel: TransactionViewModel by viewModels()
+    private val aiViewModel: AIViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,10 +47,13 @@ class TransactionScreen : ComponentActivity() {
                 val uiState by viewModel.uiState.collectAsState()
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    TransactionScreen(
+                    /*TransactionScreen(
                         uiState = uiState,
                         onIntent = viewModel::onIntent,
                         modifier = Modifier.padding(innerPadding)
+                    )*/
+                    AIChatScreen(
+                        viewModel = aiViewModel
                     )
                 }
             }
