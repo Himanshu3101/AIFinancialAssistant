@@ -1,6 +1,5 @@
 package com.himanshu.aifinancialassistant.domain.tool
 
-import android.util.Log
 import com.himanshu.aifinancialassistant.domain.model.TransactionCategory
 import com.himanshu.aifinancialassistant.domain.model.TransactionType
 import com.himanshu.aifinancialassistant.domain.repository.FinancialRepository
