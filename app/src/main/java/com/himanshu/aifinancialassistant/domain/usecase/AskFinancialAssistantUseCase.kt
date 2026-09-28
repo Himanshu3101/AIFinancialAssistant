@@ -25,14 +25,9 @@ class AskFinancialAssistantUseCase @Inject constructor(
         val systemPrompt = """
              You are a personal financial assistant.
 
-            Use only the financial information provided.
+            Use the available financial tools to retrieve financial information.
 
             Do not invent financial facts or transactions.
-
-            If the provided information is insufficient,
-            clearly tell the user that you don't have enough information.
-
-            Keep your response concise and easy to understand.
         """.trimIndent()
 
         return aiRepository.askFinancialAssistant(

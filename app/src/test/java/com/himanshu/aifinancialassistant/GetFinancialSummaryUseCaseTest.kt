@@ -148,11 +148,38 @@ class GetFinancialSummaryUseCaseTest {
             return flowOf(transactions)
         }
 
-        override suspend fun getTransactionByCategory(category: String): List<Transaction> {
+        override suspend fun getTransactionByCategory(category: TransactionCategory): List<Transaction> {
+            return when(category) {
+                TransactionCategory.FOOD -> listOf(
+                    Transaction(
+                        id = "1",
+                        merchant = "Swiggy",
+                        amount = 589.0,
+                        category = TransactionCategory.FOOD,
+                        date = "2026-09-01",
+                        type = TransactionType.DEBIT
+                    )
+                )
+
+                TransactionCategory.SHOPPING -> listOf(
+                    Transaction(
+                        id = "2",
+                        merchant = "Amazon",
+                        amount = 2499.0,
+                        category = TransactionCategory.SHOPPING,
+                        date = "2026-09-01",
+                        type = TransactionType.DEBIT
+                    )
+                )
+
+                else -> emptyList()
+            }
+        }
+       /* override suspend fun getTransactionByCategory(category: String): List<Transaction> {
             return transactions.filter{
                 it.category.name == category
             }
-        }
+        }*/
 
         override suspend fun syncTransactions() {
             TODO("Not yet implemented")

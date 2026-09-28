@@ -5,6 +5,7 @@ import com.himanshu.aifinancialassistant.data.local.todomain
 import com.himanshu.aifinancialassistant.data.remote.FakeTransactionApi
 import com.himanshu.aifinancialassistant.domain.model.Transaction
 import com.himanshu.aifinancialassistant.domain.repository.FinancialRepository
+import com.himanshu.aifinancialassistant.domain.model.TransactionCategory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -19,9 +20,22 @@ class FinancialRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getTransactionByCategory(category: String): List<Transaction> {
-        return transactionDao.getTransactionsByCategory(category).map{ it.todomain() }
+    override suspend fun getTransactionByCategory(category: TransactionCategory): List<Transaction> {
+        val storageCategory = when (category) {
+            TransactionCategory.FOOD -> "Food"
+            TransactionCategory.SHOPPING -> "Shopping"
+            TransactionCategory.TRAVEL -> "Travel"
+            TransactionCategory.BILLS -> "Bills"
+            TransactionCategory.ENTERTAINMENT -> "Entertainment"
+            TransactionCategory.HEALTH -> "Health"
+            TransactionCategory.OTHER -> "Other"
+        }
+        return transactionDao.getTransactionsByCategory(storageCategory).map{ it.todomain() }
     }
+
+//    override suspend fun getTransactionByCategory(category: String): List<Transaction> {
+//        return transactionDao.getTransactionsByCategory(category).map{ it.todomain() }
+//    }
 
     override suspend fun syncTransactions() {
         val transaction = api.getTransactions()

@@ -17,6 +17,13 @@ data class ResponseContent(
 )
 @Serializable
 data class ResponsePart(
-    val text: String? = null
+    val text: String? = null,
+    val functionCall: FunctionCall? = null
 )
 
+@Serializable
+data class FunctionCall(
+    val id: String? = null,
+    val name: String,
+    val args: Map<String, kotlinx.serialization.json.JsonElement> = emptyMap()
+)
