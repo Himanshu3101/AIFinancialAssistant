@@ -1,6 +1,5 @@
 package com.himanshu.aifinancialassistant.data.repositoryImpl
 
-import android.util.Log
 import com.himanshu.aifinancialassistant.data.remote.AIService
 import com.himanshu.aifinancialassistant.data.remote.GeminiFinancialTools
 import com.himanshu.aifinancialassistant.data.remote.model.AIRequest
