@@ -3,11 +3,8 @@ package com.himanshu.aifinancialassistant.domain.usecase
 import com.himanshu.aifinancialassistant.data.remote.FinancialContextFormatter
 import com.himanshu.aifinancialassistant.domain.ai.AIMessage
 import com.himanshu.aifinancialassistant.domain.ai.AIOrchestrator
-import com.himanshu.aifinancialassistant.domain.ai.AIProvider
 import com.himanshu.aifinancialassistant.domain.ai.AIRequest
-import com.himanshu.aifinancialassistant.domain.ai.AIResult
 import com.himanshu.aifinancialassistant.domain.ai.AIRole
-import com.himanshu.aifinancialassistant.domain.repository.AIRepository
 import javax.inject.Inject
 
 class AskFinancialAssistantUseCase @Inject constructor(

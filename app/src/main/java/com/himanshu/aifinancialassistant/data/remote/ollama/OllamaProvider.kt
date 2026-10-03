@@ -1,6 +1,5 @@
 package com.himanshu.aifinancialassistant.data.remote.ollama
 
-import android.util.Log
 import com.himanshu.aifinancialassistant.domain.ai.AIProvider
 import com.himanshu.aifinancialassistant.domain.ai.AIRequest
 import com.himanshu.aifinancialassistant.domain.ai.AIResult
