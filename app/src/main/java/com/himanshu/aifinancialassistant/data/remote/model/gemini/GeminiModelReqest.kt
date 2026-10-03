@@ -1,9 +1,10 @@
-package com.himanshu.aifinancialassistant.data.remote.model
+package com.himanshu.aifinancialassistant.data.remote.model.gemini
 
+import com.himanshu.aifinancialassistant.data.remote.model.Tool
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AIRequest(
+data class GeminiModelReqest(
     val systemInstruction: SystemInstruction? = null,  //Gemini Support SystemInstruction alongside contentsA
     val contents: List<Content>,
     val tools: List<Tool>? = null,
@@ -28,10 +29,20 @@ data class Content(
 
 @Serializable
 data class Part(
-    val text: String
+    val text: String? = null,
+    val functionCall: FunctionCall?  = null,
+    val functionResponse: FunctionResponse? = null,
+    val thoughtSignature: String? = null
 )
 
 @Serializable
 data class SystemInstruction(
     val parts: List<Part>
+)
+
+@Serializable
+data class FunctionResponse(
+    val id: String,
+    val name: String,
+    val response:Map<String, String>
 )

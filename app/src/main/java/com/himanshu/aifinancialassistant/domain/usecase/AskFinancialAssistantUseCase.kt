@@ -1,11 +1,17 @@
 package com.himanshu.aifinancialassistant.domain.usecase
 
 import com.himanshu.aifinancialassistant.data.remote.FinancialContextFormatter
+import com.himanshu.aifinancialassistant.domain.ai.AIMessage
+import com.himanshu.aifinancialassistant.domain.ai.AIOrchestrator
+import com.himanshu.aifinancialassistant.domain.ai.AIProvider
+import com.himanshu.aifinancialassistant.domain.ai.AIRequest
+import com.himanshu.aifinancialassistant.domain.ai.AIResult
+import com.himanshu.aifinancialassistant.domain.ai.AIRole
 import com.himanshu.aifinancialassistant.domain.repository.AIRepository
 import javax.inject.Inject
 
 class AskFinancialAssistantUseCase @Inject constructor(
-    private val aiRepository: AIRepository,
+    private val aiOrchestrator: AIOrchestrator,
     private val classifyFinancialQuestionUseCase: ClassifyFinancialQuestionUseCase,
     private val buildFinancialContextUseCase: BuildFinancialContextUseCase,
     private val financialContextFormatter: FinancialContextFormatter
@@ -28,12 +34,25 @@ class AskFinancialAssistantUseCase @Inject constructor(
             Use the available financial tools to retrieve financial information.
 
             Do not invent financial facts or transactions.
+            
+             Keep your response concise and easy to understand.
         """.trimIndent()
 
-        return aiRepository.askFinancialAssistant(
-            systemPrompt,
-            context,
-            userPrompt
+        val request = AIRequest(
+            systemPrompt = systemPrompt,
+            messages = listOf(
+                AIMessage(
+                    role = AIRole.USER,
+                    content = """
+                        Financial Context:
+                        $context
+                        
+                        User Question:
+                        $userPrompt
+                        """.trimIndent()
+                )
+            )
         )
+        return aiOrchestrator.execute(request)
     }
 }

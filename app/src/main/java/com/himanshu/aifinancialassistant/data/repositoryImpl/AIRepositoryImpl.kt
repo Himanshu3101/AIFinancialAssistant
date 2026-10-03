@@ -1,13 +1,15 @@
 package com.himanshu.aifinancialassistant.data.repositoryImpl
 
+import android.util.Log
 import com.himanshu.aifinancialassistant.data.remote.AIService
 import com.himanshu.aifinancialassistant.data.remote.GeminiFinancialTools
-import com.himanshu.aifinancialassistant.data.remote.model.AIRequest
-import com.himanshu.aifinancialassistant.data.remote.model.Content
-import com.himanshu.aifinancialassistant.data.remote.model.FunctionCallingConfig
-import com.himanshu.aifinancialassistant.data.remote.model.Part
-import com.himanshu.aifinancialassistant.data.remote.model.SystemInstruction
-import com.himanshu.aifinancialassistant.data.remote.model.ToolConfig
+import com.himanshu.aifinancialassistant.data.remote.model.gemini.GeminiModelReqest
+import com.himanshu.aifinancialassistant.data.remote.model.gemini.Content
+import com.himanshu.aifinancialassistant.data.remote.model.gemini.FunctionCallingConfig
+import com.himanshu.aifinancialassistant.data.remote.model.gemini.FunctionResponse
+import com.himanshu.aifinancialassistant.data.remote.model.gemini.Part
+import com.himanshu.aifinancialassistant.data.remote.model.gemini.SystemInstruction
+import com.himanshu.aifinancialassistant.data.remote.model.gemini.ToolConfig
 import com.himanshu.aifinancialassistant.data.remote.model.toText
 import com.himanshu.aifinancialassistant.data.remote.toToolArguments
 import com.himanshu.aifinancialassistant.domain.repository.AIRepository
@@ -24,7 +26,11 @@ class AIRepositoryImpl @Inject constructor(
         context: String,
         userPrompt: String
     ): String {
-        val request = AIRequest(
+
+        // FIRST REQUEST
+        // User → Gemini → FunctionCall
+
+        val firstRequest = GeminiModelReqest(
             systemInstruction = SystemInstruction(
                 parts = listOf(
                     Part(text = systemPrompt)
@@ -57,36 +63,173 @@ class AIRepositoryImpl @Inject constructor(
             )
         )
 
-        val response = aiService.generateResponse(request)
+        Log.d("AI_FLOW", "FIRST GEMINI CALL START")
 
-        val functionCall = response.candidates
-            .flatMap { it.content?.parts.orEmpty() }
-            .firstNotNullOfOrNull { it.functionCall }
+        /*val firstResponse = aiService.generateResponse(firstRequest)*/
 
-        if(functionCall != null){
+        val firstResponse = try {
+            aiService.generateResponse(firstRequest)
+        } catch (e: retrofit2.HttpException) {
 
-            val tool = financialToolRegistry.getTool(functionCall.name)?: throw IllegalArgumentException(
-                "Unknow tool: ${functionCall.name}"
+            Log.e("AI_FLOW", "FIRST GEMINI HTTP ERROR = ${e.code()}")
+
+            Log.e(
+                "AI_FLOW",
+                "FIRST GEMINI ERROR BODY = ${
+                    e.response()?.errorBody()?.string()
+                }"
             )
 
-            val arguments = functionCall.toToolArguments()
-
-            val toolResult = tool.execute(arguments)
-
+            throw e
         }
 
+        Log.d("AI_FLOW", "FIRST GEMINI CALL SUCCESS")
+        Log.d("AI_FLOW", "FUNCTION CALL = ${firstResponse.candidates}")
+
+
+        val modelContent = firstResponse.candidates
+            .firstOrNull()
+            ?.content
+            ?: return firstResponse.toText()
+
+        val functionCallPart = modelContent.parts
+            .firstOrNull{ it.functionCall != null}
+
+        val functionCall = functionCallPart?.functionCall ?: return firstResponse.toText()
+
+        //If Gemini answered directly
+
+        // Find matching Kotlin tool
+        val tool = financialToolRegistry.getTool(functionCall.name)?: throw IllegalArgumentException(
+            "Unknow tool: ${functionCall.name}"
+        )
+
+        //Convert Gemini arguments
+        val arguments = functionCall.toToolArguments()
+
+        //Execute Kotlin Code
+        val toolResult = tool.execute(arguments)
 
 
 
 
+//Second Request -> FunctionCall -> Gemini -> Final text
 
-
-
-
-        val result = response.toText()
-        if(result.isBlank()){
-            throw IllegalArgumentException("AI returned an empty response")
+        val modelResponseParts = modelContent.parts.map { responsePart->
+            Part(
+                text = responsePart.text.toString(),
+                functionCall = responsePart.functionCall,
+                thoughtSignature = responsePart.thoughtSignature
+            )
         }
-        return response.toText()
+
+        Log.d(
+            "AI_FLOW",
+            "MODEL RESPONSE PARTS = $modelResponseParts"
+        )
+
+        val functionResponse = FunctionResponse(
+            id = functionCall.id
+            ?:throw IllegalArgumentException("Function call ID is missing"),
+            name = functionCall.name,
+            response = mapOf("result" to toolResult)
+        )
+
+        val secondRequest = GeminiModelReqest(
+            systemInstruction = SystemInstruction(parts = listOf(
+                Part(text = systemPrompt)
+            )),
+            contents = listOf(
+                //Original User Question
+                Content(
+                    role = "user",
+                    parts = listOf(
+                        Part(text = userPrompt)
+                    )
+                ),
+
+                //Gemini's originalfunction Call
+                Content(
+                    role = "model",
+                    parts = modelResponseParts
+                ),
+
+                //Our tool response
+                Content(
+                    role = "user",
+                    parts = listOf(
+                        Part(
+                            functionResponse = functionResponse
+                        )
+                    )
+                )
+            ),
+
+            tools = listOf(
+                GeminiFinancialTools.getSpendingByCategory
+            ),
+
+            toolConfig = ToolConfig(
+                functionCallingConfig = FunctionCallingConfig(
+                    mode = "AUTO"
+                )
+            )
+        )
+
+        Log.d("AI_FLOW", "SECOND GEMINI CALL START")
+        Log.d("AI_FLOW", "TOOL RESULT = $toolResult")
+
+       /* val finalResponse = aiService.generateResponse(secondRequest)
+        Log.d(
+            "AI_FLOW",
+            "FINAL GEMINI RESPONSE = ${finalResponse.toText()}"
+        )
+        return finalResponse.toText()*/
+
+
+        val finalResponse = try {
+            aiService.generateResponse(secondRequest)
+        } catch (e: retrofit2.HttpException) {
+
+            Log.e(
+                "AI_FLOW",
+                "SECOND GEMINI HTTP ERROR = ${e.code()}"
+            )
+
+            Log.e(
+                "AI_FLOW",
+                "SECOND GEMINI ERROR BODY = ${
+                    e.response()?.errorBody()?.string()
+                }"
+            )
+
+            throw e
+        }
+
+        Log.d("AI_FLOW", "SECOND GEMINI CALL SUCCESS")
+
+        return finalResponse.toText()
+
+
+
+
+
+
+//        val functionCall = firstResponse.candidates
+//            .flatMap { it.content?.parts.orEmpty() }
+//            .firstNotNullOfOrNull { it.functionCall }
+//
+//        if(functionCall != null){
+//
+//
+//
+//            return toolResult
+//        }
+//
+//        val result = firstResponse.toText()
+//        if(result.isBlank()){
+//            throw IllegalArgumentException("AI returned an empty response")
+//        }
+//        return firstResponse.toText()
     }
 }
