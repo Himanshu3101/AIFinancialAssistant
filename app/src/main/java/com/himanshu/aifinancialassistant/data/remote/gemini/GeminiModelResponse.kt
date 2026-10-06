@@ -1,4 +1,4 @@
-package com.himanshu.aifinancialassistant.data.remote.model.gemini
+package com.himanshu.aifinancialassistant.data.remote.gemini
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement

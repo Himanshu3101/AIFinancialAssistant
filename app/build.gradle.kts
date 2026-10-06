@@ -14,6 +14,8 @@ val localPropertiesFile = rootProject.file("local.properties")
 if(localPropertiesFile.exists()){
     localProperties.load(localPropertiesFile.inputStream())
 }
+val aiProvider = localProperties.getProperty("AI_PROVIDER") ?: "OLLAMA"
+println("AI_PROVIDER = $aiProvider")
 val geminiApiKey = localProperties.getProperty("GEMINI_API_KEY")?: throw GradleException("API Key is missing from local.properties")
 
 android {
@@ -37,6 +39,12 @@ android {
             "String",
             "GEMINI_API_KEY",
             "\"$geminiApiKey\""
+        )
+
+        buildConfigField(
+                "String",
+        "AI_PROVIDER",
+        "\"$aiProvider\""
         )
     }
 

@@ -1,15 +1,15 @@
 package com.himanshu.aifinancialassistant.data.repositoryImpl
 
 import android.util.Log
-import com.himanshu.aifinancialassistant.data.remote.AIService
+import com.himanshu.aifinancialassistant.data.remote.gemini.GeminiService
 import com.himanshu.aifinancialassistant.data.remote.GeminiFinancialTools
-import com.himanshu.aifinancialassistant.data.remote.model.gemini.GeminiModelReqest
-import com.himanshu.aifinancialassistant.data.remote.model.gemini.Content
-import com.himanshu.aifinancialassistant.data.remote.model.gemini.FunctionCallingConfig
-import com.himanshu.aifinancialassistant.data.remote.model.gemini.FunctionResponse
-import com.himanshu.aifinancialassistant.data.remote.model.gemini.Part
-import com.himanshu.aifinancialassistant.data.remote.model.gemini.SystemInstruction
-import com.himanshu.aifinancialassistant.data.remote.model.gemini.ToolConfig
+import com.himanshu.aifinancialassistant.data.remote.gemini.GeminiModelRequest
+import com.himanshu.aifinancialassistant.data.remote.gemini.GeminiContent
+import com.himanshu.aifinancialassistant.data.remote.gemini.FunctionCallingConfig
+import com.himanshu.aifinancialassistant.data.remote.gemini.FunctionResponse
+import com.himanshu.aifinancialassistant.data.remote.gemini.Part
+import com.himanshu.aifinancialassistant.data.remote.gemini.SystemInstruction
+import com.himanshu.aifinancialassistant.data.remote.gemini.ToolConfig
 import com.himanshu.aifinancialassistant.data.remote.model.toText
 import com.himanshu.aifinancialassistant.data.remote.toToolArguments
 import com.himanshu.aifinancialassistant.domain.repository.AIRepository
@@ -17,7 +17,7 @@ import com.himanshu.aifinancialassistant.domain.tool.FinancialToolRegistry
 import javax.inject.Inject
 
 class AIRepositoryImpl @Inject constructor(
-    private val aiService: AIService,
+    private val geminiService: GeminiService,
     private val financialToolRegistry: FinancialToolRegistry
 ) : AIRepository {
 
@@ -30,14 +30,14 @@ class AIRepositoryImpl @Inject constructor(
         // FIRST REQUEST
         // User → Gemini → FunctionCall
 
-        val firstRequest = GeminiModelReqest(
+        val firstRequest = GeminiModelRequest(
             systemInstruction = SystemInstruction(
                 parts = listOf(
                     Part(text = systemPrompt)
                 )
             ),
             contents = listOf(
-                Content(
+                GeminiContent(
                     role = "user",
                     parts = listOf(
                         Part(
@@ -68,7 +68,7 @@ class AIRepositoryImpl @Inject constructor(
         /*val firstResponse = aiService.generateResponse(firstRequest)*/
 
         val firstResponse = try {
-            aiService.generateResponse(firstRequest)
+            geminiService.generateResponse(firstRequest)
         } catch (e: retrofit2.HttpException) {
 
             Log.e("AI_FLOW", "FIRST GEMINI HTTP ERROR = ${e.code()}")
@@ -135,13 +135,13 @@ class AIRepositoryImpl @Inject constructor(
             response = mapOf("result" to toolResult)
         )
 
-        val secondRequest = GeminiModelReqest(
+        val secondRequest = GeminiModelRequest(
             systemInstruction = SystemInstruction(parts = listOf(
                 Part(text = systemPrompt)
             )),
             contents = listOf(
                 //Original User Question
-                Content(
+                GeminiContent(
                     role = "user",
                     parts = listOf(
                         Part(text = userPrompt)
@@ -149,13 +149,13 @@ class AIRepositoryImpl @Inject constructor(
                 ),
 
                 //Gemini's originalfunction Call
-                Content(
+                GeminiContent(
                     role = "model",
                     parts = modelResponseParts
                 ),
 
                 //Our tool response
-                Content(
+                GeminiContent(
                     role = "user",
                     parts = listOf(
                         Part(
@@ -188,7 +188,7 @@ class AIRepositoryImpl @Inject constructor(
 
 
         val finalResponse = try {
-            aiService.generateResponse(secondRequest)
+            geminiService.generateResponse(secondRequest)
         } catch (e: retrofit2.HttpException) {
 
             Log.e(

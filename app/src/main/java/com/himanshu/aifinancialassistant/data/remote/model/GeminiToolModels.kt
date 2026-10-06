@@ -4,12 +4,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Tool(
-    val functionDeclarations: List<FunctionDeclaration>
+    val functionDeclarations: List<GeminiFunctionDeclaration>
 )
 
 
 @Serializable
-data class FunctionDeclaration(
+data class GeminiFunctionDeclaration(
     val name: String,
     val description: String,
     val parameters: FunctionParameters

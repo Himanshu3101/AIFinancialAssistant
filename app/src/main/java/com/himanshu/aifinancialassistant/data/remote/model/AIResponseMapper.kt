@@ -1,6 +1,6 @@
 package com.himanshu.aifinancialassistant.data.remote.model
 
-import com.himanshu.aifinancialassistant.data.remote.model.gemini.GeminiModelResponse
+import com.himanshu.aifinancialassistant.data.remote.gemini.GeminiModelResponse
 
 fun GeminiModelResponse.toText(): String{
     return candidates

@@ -22,7 +22,8 @@ enum class AIRole{
 data class AIToolCall(
     val id: String,
     val name: String,
-    val arguments: Map<String, String/*ToolArgument*/>
+    val arguments: Map<String, String>,
+    val thoughtSignature: String? = null
 )
 data class AITool(
     val name: String,
