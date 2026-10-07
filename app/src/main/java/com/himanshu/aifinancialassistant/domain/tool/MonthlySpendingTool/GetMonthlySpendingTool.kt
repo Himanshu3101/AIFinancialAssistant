@@ -25,10 +25,8 @@ class GetMonthlySpendingTool @Inject constructor(
     )
 
     override suspend fun execute(arguments: Map<String, String>): String {
-        val args = GetMonthlySpendingArguments.from(arguments)
+        val month = arguments["month"]
             ?: return "Month is required in YYYY-MM format."
-
-        val month = args.month
 
         if(!month.matches(Regex("\\d{4}-\\d{2}"))){
             return "Invalid month format. Use YYYY-MM."
